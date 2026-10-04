@@ -9,9 +9,17 @@ import (
 )
 
 type Domain struct {
-	ID        pgtype.UUID        `json:"id"`
-	Name      string             `json:"name"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID                 pgtype.UUID        `json:"id"`
+	Name               string             `json:"name"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	ImapHost           string             `json:"imap_host"`
+	ImapUsernameFormat string             `json:"imap_username_format"`
+	ImapPort           int32              `json:"imap_port"`
+	ImapEncryption     string             `json:"imap_encryption"`
+	SmtpHost           string             `json:"smtp_host"`
+	SmtpPort           int32              `json:"smtp_port"`
+	SmtpEncryption     string             `json:"smtp_encryption"`
+	AllowInsecureTls   bool               `json:"allow_insecure_tls"`
 }
 
 type Mailbox struct {
@@ -40,8 +48,8 @@ type Session struct {
 	ID         pgtype.UUID        `json:"id"`
 	UserID     pgtype.UUID        `json:"user_id"`
 	TokenHash  string             `json:"token_hash"`
-	IpAddress  pgtype.Text        `json:"ip_address"`
-	UserAgent  pgtype.Text        `json:"user_agent"`
+	IpAddress  string             `json:"ip_address"`
+	UserAgent  string             `json:"user_agent"`
 	LastSeenAt pgtype.Timestamptz `json:"last_seen_at"`
 	ExpiresAt  pgtype.Timestamptz `json:"expires_at"`
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
@@ -51,7 +59,7 @@ type User struct {
 	ID                    pgtype.UUID        `json:"id"`
 	DomainID              pgtype.UUID        `json:"domain_id"`
 	Email                 string             `json:"email"`
-	PasswordHash          string             `json:"password_hash"`
 	EncryptedImapPassword []byte             `json:"encrypted_imap_password"`
 	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	AuthStatus            string             `json:"auth_status"`
 }

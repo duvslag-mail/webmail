@@ -11,17 +11,18 @@ import (
 )
 
 type Querier interface {
-	CreateDomain(ctx context.Context, name string) (Domain, error)
+	CreateDomain(ctx context.Context, name string) (CreateDomainRow, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
 	DeleteExpiredSessions(ctx context.Context) error
 	DeleteSessionByTokenHash(ctx context.Context, tokenHash string) error
 	GetDomainByName(ctx context.Context, name string) (Domain, error)
 	GetSessionByTokenHash(ctx context.Context, tokenHash string) (Session, error)
-	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
-	GetUserById(ctx context.Context, id pgtype.UUID) (GetUserByIdRow, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
+	GetUserById(ctx context.Context, id pgtype.UUID) (User, error)
 	UpdateSessionLastSeen(ctx context.Context, tokenHash string) (Session, error)
 	UpdateUserImapPassword(ctx context.Context, arg UpdateUserImapPasswordParams) error
+	UpsertUser(ctx context.Context, arg UpsertUserParams) (UpsertUserRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

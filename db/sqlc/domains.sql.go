@@ -7,6 +7,8 @@ package sqlc
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createDomain = `-- name: CreateDomain :one
@@ -15,22 +17,40 @@ VALUES ($1)
 RETURNING id, name, created_at
 `
 
-func (q *Queries) CreateDomain(ctx context.Context, name string) (Domain, error) {
+type CreateDomainRow struct {
+	ID        pgtype.UUID        `json:"id"`
+	Name      string             `json:"name"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) CreateDomain(ctx context.Context, name string) (CreateDomainRow, error) {
 	row := q.db.QueryRow(ctx, createDomain, name)
-	var i Domain
+	var i CreateDomainRow
 	err := row.Scan(&i.ID, &i.Name, &i.CreatedAt)
 	return i, err
 }
 
 const getDomainByName = `-- name: GetDomainByName :one
-SELECT id, name, created_at
-FROM DOMAINS
-where name = $1
+SELECT id, name, created_at, imap_host, imap_username_format, imap_port, imap_encryption, smtp_host, smtp_port, smtp_encryption, allow_insecure_tls
+FROM domains
+WHERE name = $1
 `
 
 func (q *Queries) GetDomainByName(ctx context.Context, name string) (Domain, error) {
 	row := q.db.QueryRow(ctx, getDomainByName, name)
 	var i Domain
-	err := row.Scan(&i.ID, &i.Name, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.ImapHost,
+		&i.ImapUsernameFormat,
+		&i.ImapPort,
+		&i.ImapEncryption,
+		&i.SmtpHost,
+		&i.SmtpPort,
+		&i.SmtpEncryption,
+		&i.AllowInsecureTls,
+	)
 	return i, err
 }
