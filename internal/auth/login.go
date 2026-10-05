@@ -17,6 +17,7 @@ var (
 	ErrPasswordRequired         = errors.New("password is required")
 	ErrInvalidCredentials       = errors.New("invalid credentials")
 	ErrPasswordEncryptionFailed = errors.New("failed to encrypt password")
+	ErrDatabaseError            = errors.New("database error")
 
 	EmailRegex = `^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`
 )
@@ -99,8 +100,16 @@ func (s *AuthService) Login(input LoginInput) (string, error) {
 		EncryptedImapPassword: []byte(encryptedPassword),
 	}
 	row, err := s.db.UpsertUser(ctx, upsertUserArgs)
+	if err != nil {
+		return "", ErrDatabaseError
+	}
+	// check if the user exists
+	if !row.ID.Valid {
+		return "", ErrInvalidCredentials
+	}
 
-	err, token := s.CreateSession(ctx, row.ID.Bytes, input.IpAddress, input.UserAgent)
+	// create a session
+	token, err := s.CreateSession(ctx, row.ID.Bytes, input.IpAddress, input.UserAgent)
 
 	if err != nil {
 		return "", err
