@@ -20,8 +20,8 @@ RETURNING id, user_id, token_hash, ip_address, user_agent, last_seen_at, expires
 type CreateSessionParams struct {
 	UserID    pgtype.UUID        `json:"user_id"`
 	TokenHash string             `json:"token_hash"`
-	IpAddress pgtype.Text        `json:"ip_address"`
-	UserAgent pgtype.Text        `json:"user_agent"`
+	IpAddress string             `json:"ip_address"`
+	UserAgent string             `json:"user_agent"`
 	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
 }
 

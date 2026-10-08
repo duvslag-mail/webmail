@@ -12,88 +12,76 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (domain_id, email, password_hash)
+INSERT INTO users (domain_id, email, encrypted_imap_password)
 VALUES ($1, $2, $3)
-RETURNING id, domain_id, email, password_hash, created_at
+RETURNING id, domain_id, email, encrypted_imap_password, auth_status, created_at
 `
 
 type CreateUserParams struct {
-	DomainID     pgtype.UUID `json:"domain_id"`
-	Email        string      `json:"email"`
-	PasswordHash string      `json:"password_hash"`
+	DomainID              pgtype.UUID `json:"domain_id"`
+	Email                 string      `json:"email"`
+	EncryptedImapPassword []byte      `json:"encrypted_imap_password"`
 }
 
 type CreateUserRow struct {
-	ID           pgtype.UUID        `json:"id"`
-	DomainID     pgtype.UUID        `json:"domain_id"`
-	Email        string             `json:"email"`
-	PasswordHash string             `json:"password_hash"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	ID                    pgtype.UUID        `json:"id"`
+	DomainID              pgtype.UUID        `json:"domain_id"`
+	Email                 string             `json:"email"`
+	EncryptedImapPassword []byte             `json:"encrypted_imap_password"`
+	AuthStatus            string             `json:"auth_status"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.DomainID, arg.Email, arg.PasswordHash)
+	row := q.db.QueryRow(ctx, createUser, arg.DomainID, arg.Email, arg.EncryptedImapPassword)
 	var i CreateUserRow
 	err := row.Scan(
 		&i.ID,
 		&i.DomainID,
 		&i.Email,
-		&i.PasswordHash,
+		&i.EncryptedImapPassword,
+		&i.AuthStatus,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, domain_id, email, password_hash, created_at
+SELECT id, domain_id, email, encrypted_imap_password, created_at, auth_status
 FROM users
 WHERE email = $1
 `
 
-type GetUserByEmailRow struct {
-	ID           pgtype.UUID        `json:"id"`
-	DomainID     pgtype.UUID        `json:"domain_id"`
-	Email        string             `json:"email"`
-	PasswordHash string             `json:"password_hash"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
-}
-
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByEmail, email)
-	var i GetUserByEmailRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.DomainID,
 		&i.Email,
-		&i.PasswordHash,
+		&i.EncryptedImapPassword,
 		&i.CreatedAt,
+		&i.AuthStatus,
 	)
 	return i, err
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, domain_id, email, password_hash, created_at
+SELECT id, domain_id, email, encrypted_imap_password, created_at, auth_status
 FROM users
 WHERE id = $1
 `
 
-type GetUserByIdRow struct {
-	ID           pgtype.UUID        `json:"id"`
-	DomainID     pgtype.UUID        `json:"domain_id"`
-	Email        string             `json:"email"`
-	PasswordHash string             `json:"password_hash"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
-}
-
-func (q *Queries) GetUserById(ctx context.Context, id pgtype.UUID) (GetUserByIdRow, error) {
+func (q *Queries) GetUserById(ctx context.Context, id pgtype.UUID) (User, error) {
 	row := q.db.QueryRow(ctx, getUserById, id)
-	var i GetUserByIdRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.DomainID,
 		&i.Email,
-		&i.PasswordHash,
+		&i.EncryptedImapPassword,
 		&i.CreatedAt,
+		&i.AuthStatus,
 	)
 	return i, err
 }
@@ -112,4 +100,46 @@ type UpdateUserImapPasswordParams struct {
 func (q *Queries) UpdateUserImapPassword(ctx context.Context, arg UpdateUserImapPasswordParams) error {
 	_, err := q.db.Exec(ctx, updateUserImapPassword, arg.EncryptedImapPassword, arg.ID)
 	return err
+}
+
+const upsertUser = `-- name: UpsertUser :one
+INSERT INTO users (
+    domain_id,
+    email,
+    encrypted_imap_password
+) VALUES (
+    $1, $2, $3
+)
+ON CONFLICT (email) DO UPDATE SET
+    domain_id = EXCLUDED.domain_id,
+    encrypted_imap_password = EXCLUDED.encrypted_imap_password,
+    auth_status = 'active'
+RETURNING id, domain_id, email, auth_status, created_at
+`
+
+type UpsertUserParams struct {
+	DomainID              pgtype.UUID `json:"domain_id"`
+	Email                 string      `json:"email"`
+	EncryptedImapPassword []byte      `json:"encrypted_imap_password"`
+}
+
+type UpsertUserRow struct {
+	ID         pgtype.UUID        `json:"id"`
+	DomainID   pgtype.UUID        `json:"domain_id"`
+	Email      string             `json:"email"`
+	AuthStatus string             `json:"auth_status"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) (UpsertUserRow, error) {
+	row := q.db.QueryRow(ctx, upsertUser, arg.DomainID, arg.Email, arg.EncryptedImapPassword)
+	var i UpsertUserRow
+	err := row.Scan(
+		&i.ID,
+		&i.DomainID,
+		&i.Email,
+		&i.AuthStatus,
+		&i.CreatedAt,
+	)
+	return i, err
 }

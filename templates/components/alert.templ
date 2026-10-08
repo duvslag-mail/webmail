@@ -1,0 +1,22 @@
+package components
+
+type AlertType string
+
+const (
+	AlertError   AlertType = "error"
+	AlertSuccess AlertType = "success"
+)
+
+templ Alert(message string, alertType AlertType) {
+	if message != "" {
+		if alertType == AlertError {
+			<div class="alert alert--danger">
+				{ message }
+			</div>
+		} else {
+			<div class="alert">
+				{ message }
+			</div>
+		}
+	}
+}

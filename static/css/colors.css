@@ -1,0 +1,39 @@
+@layer colors {
+    :root {
+        --hue-primary: 155;
+        --hue-success: 145;
+        --hue-danger: 25;
+        --hue-warning: 75;
+        --hue-info: 240;
+
+        --color-canvas: oklch(98% 0.01 var(--hue-primary));
+        --color-surface: oklch(100% 0 0);
+        --color-ink: oklch(20% 0.02 var(--hue-primary));
+        --color-muted: oklch(55% 0.02 var(--hue-primary));
+        --color-border: oklch(90% 0.02 var(--hue-primary));
+
+        --color-accent: oklch(48% 0.18 var(--hue-primary));
+        --color-success: oklch(52% 0.18 var(--hue-success));
+        --color-danger: oklch(52% 0.22 var(--hue-danger));
+        --color-warning: oklch(62% 0.18 var(--hue-warning));
+        --color-info: oklch(55% 0.18 var(--hue-info));
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --color-canvas: oklch(
+                14% 0.02 var(--hue-primary)
+            ); /* Fixed chroma 0.2 -> 0.02 */
+            --color-surface: oklch(18% 0.02 var(--hue-primary));
+            --color-ink: oklch(95% 0.01 var(--hue-primary));
+            --color-muted: oklch(70% 0.02 var(--hue-primary));
+            --color-border: oklch(28% 0.02 var(--hue-primary));
+
+            --color-accent: oklch(70% 0.16 var(--hue-primary));
+            --color-success: oklch(70% 0.16 var(--hue-success));
+            --color-danger: oklch(68% 0.18 var(--hue-danger));
+            --color-warning: oklch(75% 0.16 var(--hue-warning));
+            --color-info: oklch(72% 0.16 var(--hue-info));
+        }
+    }
+}

@@ -1,7 +1,7 @@
 -- name: GetDomainByName :one
-SELECT id, name, created_at
-FROM DOMAINS
-where name = $1;
+SELECT *
+FROM domains
+WHERE name = $1;
 
 -- name: CreateDomain :one
 INSERT INTO domains (name)

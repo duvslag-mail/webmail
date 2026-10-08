@@ -1,0 +1,14 @@
+@layer utilities {
+    .flex {
+        display: flex;
+    }
+    .row {
+        flex-direction: row;
+    }
+    .column {
+        flex-direction: column;
+    }
+    .gap {
+        gap: 0.5rem;
+    }
+}
