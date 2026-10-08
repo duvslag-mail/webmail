@@ -1,0 +1,31 @@
+@layer reset {
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        min-block-size: 100dvh;
+        line-height: 1.5;
+        font-family: "IBM Plex Mono", monospace;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    img,
+    picture,
+    svg,
+    video {
+        display: block;
+        max-inline-size: 100%;
+    }
+
+    input,
+    button,
+    textarea,
+    select {
+        font: inherit;
+    }
+}

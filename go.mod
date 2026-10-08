@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/a-h/templ v0.3.1070 // indirect
 	github.com/emersion/go-message v0.18.2 // indirect
 	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect

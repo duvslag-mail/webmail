@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/hex"
 	"log"
 	"net/http"
 	"os"
@@ -28,7 +29,7 @@ func main() {
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
 
-	imapEncryptionKey := os.Getenv("IMAP_ENCRYPTION_KEY")
+	imapEncryptionKey, err := hex.DecodeString(os.Getenv("IMAP_ENCRYPTION_KEY"))
 
 	//  db setup
 	dbUrl := "postgres://" + dbUser + ":" + dbPassword + "@" + dbHost + ":" + dbPort + "/" + dbName + "?sslmode=disable"
@@ -72,9 +73,12 @@ func main() {
 	// static files
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
-	authService := auth.NewAuthService(queries, []byte(imapEncryptionKey))
+	authService := auth.NewAuthService(queries, imapEncryptionKey)
 	authHandler := handlers.NewAuthHandler(authService)
 	authHandler.RegisterRoutes(r)
+
+	mailHandler := handlers.NewMailHandler()
+	mailHandler.RegisterRoutes(r)
 
 	port := os.Getenv("PORT")
 	if port == "" {

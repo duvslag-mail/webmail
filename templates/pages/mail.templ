@@ -1,0 +1,14 @@
+package pages
+
+import "github.com/duvlsag-mail/webmail/templates/layouts"
+
+templ Mail() {
+	@layouts.Base("Mail", []string{"/static/css/pages/home.css"}) {
+		<div>
+			<h1>mail hii</h1>
+			<form method="POST" action="/logout">
+				<button type="submit">Logout</button>
+			</form>
+		</div>
+	}
+}

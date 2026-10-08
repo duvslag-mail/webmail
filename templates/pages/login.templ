@@ -1,0 +1,37 @@
+package pages
+
+import (
+	"github.com/duvlsag-mail/webmail/templates/components"
+	"github.com/duvlsag-mail/webmail/templates/layouts"
+)
+
+templ Login(errorMessage string) {
+	@layouts.Base("Login", []string{"/static/css/pages/login.css"}) {
+		<div>
+			<div id="login-container" class="auth-container">
+				@LoginForm(errorMessage)
+			</div>
+		</div>
+	}
+}
+
+templ LoginForm(errorMessage string) {
+	<form hx-post="/login" hx-target="#login-container" hx-swap="innerHTML">
+		@components.Alert(errorMessage, components.AlertError)
+		<div class="flex column">
+			<div class="flex column">
+				<label>
+					Email
+				</label>
+				<input type="text" name="email" autocomplete="none" required/>
+			</div>
+			<div class="column flex">
+				<label>Password</label>
+				<input type="password" name="password" required/>
+			</div>
+		</div>
+		<button type="submit">
+			log in
+		</button>
+	</form>
+}

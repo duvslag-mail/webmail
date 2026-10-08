@@ -5,6 +5,8 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -17,6 +19,7 @@ var (
 	tokenLength              = 32
 	ErrTokenGenerationFailed = errors.New("failed to generate token")
 	ErrSessionCreationFailed = errors.New("failed to create session")
+	sessionDuration          = 24 * time.Hour
 )
 
 // CreateSession creates a new session for a given user id and returns an error if something went wrong and a session token
@@ -38,11 +41,16 @@ func (s *AuthService) CreateSession(ctx context.Context, userId uuid.UUID, ipAdr
 		TokenHash: hashedToken,
 		IpAddress: ipAdress,
 		UserAgent: userAgent,
+		ExpiresAt: pgtype.Timestamptz{
+			Time:  time.Now().Add(sessionDuration),
+			Valid: true,
+		},
 	}
 
 	_, err = s.db.CreateSession(ctx, args)
 
 	if err != nil {
+		log.Printf("failed to create session: %v", err)
 		return "", ErrSessionCreationFailed
 	}
 
@@ -58,17 +66,28 @@ func NewToken() (error, string) {
 }
 
 // VerifySession verifies a session token and returns an error if the session is not valid and the user id of the session
-func (s *AuthService) VerifySession(ctx context.Context, token string) (error, uuid.UUID) {
+func (s *AuthService) VerifySession(ctx context.Context, token string) (uuid.UUID, error) {
 	hashedToken := crypto.Hash(token)
 
 	session, err := s.db.GetSessionByTokenHash(ctx, hashedToken)
 	if err != nil {
-		return err, uuid.Nil
+		return uuid.Nil, err
 	}
 
 	if !session.ID.Valid {
-		return errors.New("session is not valid"), uuid.Nil
+		return uuid.Nil, errors.New("session is not valid")
 	}
 
-	return nil, session.UserID.Bytes
+	return session.UserID.Bytes, nil
+}
+
+func (s *AuthService) DeleteSession(ctx context.Context, token string) error {
+	hashedToken := crypto.Hash(token)
+
+	err := s.db.DeleteSessionByTokenHash(ctx, hashedToken)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

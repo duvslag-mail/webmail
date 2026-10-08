@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -90,6 +91,7 @@ func (s *AuthService) Login(input LoginInput) (string, error) {
 	encryptedPassword, err := crypto.Encrypt([]byte(input.Password), s.masterKey)
 
 	if err != nil {
+		log.Println("Failed to encrypt password:", err)
 		return "", ErrPasswordEncryptionFailed
 	}
 

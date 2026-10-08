@@ -1,0 +1,32 @@
+/* alert */
+
+@layer components {
+    .alert {
+        --intent: var(--color-accent);
+
+        background-color: color-mix(
+            in oklch,
+            var(--intent) 10%,
+            var(--color-surface)
+        );
+        color: color-mix(in oklch, var(--intent) 85%, var(--color-ink));
+        border: 1px solid color-mix(in oklch, var(--intent) 30%, transparent);
+
+        padding: 0.25rem;
+        border-radius: 2px;
+        font-size: 1em;
+    }
+
+    .alert--danger {
+        --intent: var(--color-danger);
+    }
+    .alert--success {
+        --intent: var(--color-success);
+    }
+    .alert--warning {
+        --intent: var(--color-warning);
+    }
+    .alert--info {
+        --intent: var(--color-info);
+    }
+}
