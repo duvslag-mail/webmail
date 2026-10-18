@@ -5,10 +5,12 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/duvlsag-mail/webmail/db/sqlc"
@@ -70,15 +72,18 @@ func NewToken() (error, string) {
 
 // VerifySession verifies a session token and returns an error if the session is not valid and the user id of the session
 func (s *AuthService) VerifySession(ctx context.Context, token string) (uuid.UUID, error) {
+	if token == "" {
+		return uuid.Nil, ErrSessionNotFound
+	}
+
 	hashedToken := crypto.Hash(token)
 
 	session, err := s.db.GetSessionByTokenHash(ctx, hashedToken)
 	if err != nil {
-		return uuid.Nil, ErrDbError
-	}
-
-	if !session.ID.Valid {
-		return uuid.Nil, ErrSessionNotFound
+		if errors.Is(err, pgx.ErrNoRows) {
+			return uuid.Nil, ErrSessionNotFound
+		}
+		return uuid.Nil, fmt.Errorf("%w: %v", ErrDbError, err)
 	}
 
 	// check if the session didn't expire

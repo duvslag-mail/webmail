@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"errors"
+	"log"
 	"net/http"
 
 	"github.com/a-h/templ"
@@ -23,14 +25,15 @@ func (h *AuthHandler) HandleAuthRouter(w http.ResponseWriter, r *http.Request) {
 	_, err := h.AuthService.VerifySession(ctx, sessionToken(r))
 
 	if err != nil {
-		if err == auth.ErrDbError {
+		if errors.Is(err, auth.ErrDbError) {
+			log.Printf("session lookup failed: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
-		} else {
-			// session is invalid so redirect to login
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
 		}
+
+		// session is invalid so redirect to login
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
 	}
 
 	http.Redirect(w, r, "/mail", http.StatusSeeOther)
