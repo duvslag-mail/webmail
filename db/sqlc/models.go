@@ -22,28 +22,6 @@ type Domain struct {
 	AllowInsecureTls   bool               `json:"allow_insecure_tls"`
 }
 
-type Mailbox struct {
-	ID        pgtype.UUID        `json:"id"`
-	UserID    pgtype.UUID        `json:"user_id"`
-	Name      string             `json:"name"`
-	ParentID  pgtype.UUID        `json:"parent_id"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-}
-
-type Message struct {
-	ID         pgtype.UUID        `json:"id"`
-	MailboxID  pgtype.UUID        `json:"mailbox_id"`
-	MessageID  pgtype.Text        `json:"message_id"`
-	Sender     string             `json:"sender"`
-	Recipient  string             `json:"recipient"`
-	Subject    pgtype.Text        `json:"subject"`
-	BodyText   pgtype.Text        `json:"body_text"`
-	BodyHtml   pgtype.Text        `json:"body_html"`
-	IsRead     pgtype.Bool        `json:"is_read"`
-	IsFlagged  pgtype.Bool        `json:"is_flagged"`
-	ReceivedAt pgtype.Timestamptz `json:"received_at"`
-}
-
 type Session struct {
 	ID         pgtype.UUID        `json:"id"`
 	UserID     pgtype.UUID        `json:"user_id"`
