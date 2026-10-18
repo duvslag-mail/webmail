@@ -88,9 +88,13 @@ func (h *AuthHandler) HandleLoginRequest(w http.ResponseWriter, r *http.Request)
 
 	// set the token in a cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:  "token",
-		Value: token,
-		Path:  "/",
+		Name:     "token",
+		HttpOnly: true,
+		Secure:   true,
+		MaxAge:   int(auth.SessionDuration.Seconds()),
+		SameSite: http.SameSiteLaxMode,
+		Value:    token,
+		Path:     "/",
 	})
 
 	if isHTMX(r) {

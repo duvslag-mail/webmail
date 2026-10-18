@@ -19,7 +19,7 @@ var (
 	tokenLength              = 32
 	ErrTokenGenerationFailed = errors.New("failed to generate token")
 	ErrSessionCreationFailed = errors.New("failed to create session")
-	sessionDuration          = 24 * time.Hour
+	SessionDuration          = 7 * 24 * time.Hour
 )
 
 // CreateSession creates a new session for a given user id and returns an error if something went wrong and a session token
@@ -42,7 +42,7 @@ func (s *AuthService) CreateSession(ctx context.Context, userId uuid.UUID, ipAdr
 		IpAddress: ipAdress,
 		UserAgent: userAgent,
 		ExpiresAt: pgtype.Timestamptz{
-			Time:  time.Now().Add(sessionDuration),
+			Time:  time.Now().Add(SessionDuration),
 			Valid: true,
 		},
 	}
