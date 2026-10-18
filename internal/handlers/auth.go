@@ -59,6 +59,16 @@ func (h *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// delete the cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    "",
+		HttpOnly: true,
+		Secure:   true,
+		MaxAge:   -1,
+		SameSite: http.SameSiteLaxMode,
+	})
+
 	// redirect to /login
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
