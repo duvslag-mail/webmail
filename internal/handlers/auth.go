@@ -20,7 +20,7 @@ func NewAuthHandler(authService *auth.AuthService) *AuthHandler {
 
 func (h *AuthHandler) HandleAuthRouter(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	valid, err := h.AuthService.VerifyAuth(ctx, r.Cookies())
+	_, err := h.AuthService.VerifySession(ctx, sessionToken(r))
 
 	if err != nil {
 		if err == auth.ErrDbError {
@@ -33,11 +33,6 @@ func (h *AuthHandler) HandleAuthRouter(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if !valid {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
 	http.Redirect(w, r, "/mail", http.StatusSeeOther)
 }
 
@@ -47,14 +42,7 @@ func (h *AuthHandler) HandleLoginPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
-	token := ""
-	cookies := r.Cookies()
-	for _, cookie := range cookies {
-		if cookie.Name == "token" {
-			token = cookie.Value
-			break
-		}
-	}
+	token := sessionToken(r)
 
 	if token == "" {
 		// return a server error, who tries to logout without a token :<
