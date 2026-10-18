@@ -19,6 +19,9 @@ var (
 	tokenLength              = 32
 	ErrTokenGenerationFailed = errors.New("failed to generate token")
 	ErrSessionCreationFailed = errors.New("failed to create session")
+	ErrSessionNotFound       = errors.New("session not found")
+	ErrSessionExpired        = errors.New("session has expired")
+	ErrDbError               = errors.New("database error")
 	SessionDuration          = 7 * 24 * time.Hour
 )
 
@@ -71,16 +74,16 @@ func (s *AuthService) VerifySession(ctx context.Context, token string) (uuid.UUI
 
 	session, err := s.db.GetSessionByTokenHash(ctx, hashedToken)
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, ErrDbError
 	}
 
 	if !session.ID.Valid {
-		return uuid.Nil, errors.New("session is not valid")
+		return uuid.Nil, ErrSessionNotFound
 	}
 
 	// check if the session didn't expire
 	if !session.ExpiresAt.Valid || session.ExpiresAt.Time.Before(time.Now()) {
-		return uuid.Nil, errors.New("session has expired")
+		return uuid.Nil, ErrSessionExpired
 	}
 
 	return session.UserID.Bytes, nil

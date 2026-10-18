@@ -3,7 +3,7 @@ package handlers
 import "github.com/go-chi/chi/v5"
 
 func (h *AuthHandler) RegisterRoutes(r *chi.Mux) {
-	r.Get("/", h.HandleHome)
+	r.Get("/", h.HandleAuthRouter)
 	r.Get("/login", h.HandleLoginPage)
 	r.Post("/login", h.HandleLoginRequest)
 	r.Post("/logout", h.HandleLogout)

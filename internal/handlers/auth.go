@@ -18,9 +18,20 @@ func NewAuthHandler(authService *auth.AuthService) *AuthHandler {
 	}
 }
 
-func (h *AuthHandler) HandleHome(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) HandleAuthRouter(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	valid, _ := h.AuthService.VerifyAuth(ctx, r.Cookies())
+	valid, err := h.AuthService.VerifyAuth(ctx, r.Cookies())
+
+	if err != nil {
+		if err == auth.ErrDbError {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		} else {
+			// session is invalid so redirect to login
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+	}
 
 	if !valid {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
