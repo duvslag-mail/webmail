@@ -20,11 +20,7 @@ func NewAuthHandler(authService *auth.AuthService) *AuthHandler {
 
 func (h *AuthHandler) HandleHome(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	valid, err := h.AuthService.VerifyAuth(ctx, r.Cookies())
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
+	valid, _ := h.AuthService.VerifyAuth(ctx, r.Cookies())
 
 	if !valid {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -84,7 +80,7 @@ func (h *AuthHandler) HandleLoginRequest(w http.ResponseWriter, r *http.Request)
 	}
 
 	// attempt to login
-	token, err := h.AuthService.Login(loginInput)
+	token, err := h.AuthService.Login(r.Context(), loginInput)
 	if err != nil {
 		h.renderError(w, r, err.Error(), http.StatusUnauthorized)
 		return
