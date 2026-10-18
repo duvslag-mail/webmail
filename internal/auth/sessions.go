@@ -78,6 +78,11 @@ func (s *AuthService) VerifySession(ctx context.Context, token string) (uuid.UUI
 		return uuid.Nil, errors.New("session is not valid")
 	}
 
+	// check if the session didn't expire
+	if !session.ExpiresAt.Valid || session.ExpiresAt.Time.Before(time.Now()) {
+		return uuid.Nil, errors.New("session has expired")
+	}
+
 	return session.UserID.Bytes, nil
 }
 
