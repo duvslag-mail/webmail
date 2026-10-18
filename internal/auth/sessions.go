@@ -5,10 +5,12 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/duvlsag-mail/webmail/db/sqlc"
@@ -19,7 +21,10 @@ var (
 	tokenLength              = 32
 	ErrTokenGenerationFailed = errors.New("failed to generate token")
 	ErrSessionCreationFailed = errors.New("failed to create session")
-	sessionDuration          = 24 * time.Hour
+	ErrSessionNotFound       = errors.New("session not found")
+	ErrSessionExpired        = errors.New("session has expired")
+	ErrDbError               = errors.New("database error")
+	SessionDuration          = 7 * 24 * time.Hour
 )
 
 // CreateSession creates a new session for a given user id and returns an error if something went wrong and a session token
@@ -42,7 +47,7 @@ func (s *AuthService) CreateSession(ctx context.Context, userId uuid.UUID, ipAdr
 		IpAddress: ipAdress,
 		UserAgent: userAgent,
 		ExpiresAt: pgtype.Timestamptz{
-			Time:  time.Now().Add(sessionDuration),
+			Time:  time.Now().Add(SessionDuration),
 			Valid: true,
 		},
 	}
@@ -67,15 +72,23 @@ func NewToken() (error, string) {
 
 // VerifySession verifies a session token and returns an error if the session is not valid and the user id of the session
 func (s *AuthService) VerifySession(ctx context.Context, token string) (uuid.UUID, error) {
+	if token == "" {
+		return uuid.Nil, ErrSessionNotFound
+	}
+
 	hashedToken := crypto.Hash(token)
 
 	session, err := s.db.GetSessionByTokenHash(ctx, hashedToken)
 	if err != nil {
-		return uuid.Nil, err
+		if errors.Is(err, pgx.ErrNoRows) {
+			return uuid.Nil, ErrSessionNotFound
+		}
+		return uuid.Nil, fmt.Errorf("%w: %v", ErrDbError, err)
 	}
 
-	if !session.ID.Valid {
-		return uuid.Nil, errors.New("session is not valid")
+	// check if the session didn't expire
+	if !session.ExpiresAt.Valid || session.ExpiresAt.Time.Before(time.Now()) {
+		return uuid.Nil, ErrSessionExpired
 	}
 
 	return session.UserID.Bytes, nil

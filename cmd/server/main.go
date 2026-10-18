@@ -75,10 +75,13 @@ func main() {
 
 	authService := auth.NewAuthService(queries, imapEncryptionKey)
 	authHandler := handlers.NewAuthHandler(authService)
-	authHandler.RegisterRoutes(r)
+	authHandler.RegisterRoutes(r) // public routes
 
 	mailHandler := handlers.NewMailHandler()
-	mailHandler.RegisterRoutes(r)
+	r.Group(func(r chi.Router) {
+		r.Use(handlers.RequireAuth(authService))
+		mailHandler.RegisterRoutes(r)
+	})
 
 	port := os.Getenv("PORT")
 	if port == "" {

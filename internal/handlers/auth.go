@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"errors"
+	"log"
 	"net/http"
 
 	"github.com/a-h/templ"
@@ -18,11 +20,18 @@ func NewAuthHandler(authService *auth.AuthService) *AuthHandler {
 	}
 }
 
-func (h *AuthHandler) HandleHome(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) HandleAuthRouter(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	valid, _ := h.AuthService.VerifyAuth(ctx, r.Cookies())
+	_, err := h.AuthService.VerifySession(ctx, sessionToken(r))
 
-	if !valid {
+	if err != nil {
+		if errors.Is(err, auth.ErrDbError) {
+			log.Printf("session lookup failed: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		// session is invalid so redirect to login
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
@@ -36,14 +45,7 @@ func (h *AuthHandler) HandleLoginPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
-	token := ""
-	cookies := r.Cookies()
-	for _, cookie := range cookies {
-		if cookie.Name == "token" {
-			token = cookie.Value
-			break
-		}
-	}
+	token := sessionToken(r)
 
 	if token == "" {
 		// return a server error, who tries to logout without a token :<
@@ -56,6 +58,17 @@ func (h *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+
+	// delete the cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		MaxAge:   -1,
+		SameSite: http.SameSiteLaxMode,
+	})
 
 	// redirect to /login
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -88,9 +101,13 @@ func (h *AuthHandler) HandleLoginRequest(w http.ResponseWriter, r *http.Request)
 
 	// set the token in a cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:  "token",
-		Value: token,
-		Path:  "/",
+		Name:     "token",
+		HttpOnly: true,
+		Secure:   true,
+		MaxAge:   int(auth.SessionDuration.Seconds()),
+		SameSite: http.SameSiteLaxMode,
+		Value:    token,
+		Path:     "/",
 	})
 
 	if isHTMX(r) {
