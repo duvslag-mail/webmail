@@ -4,6 +4,7 @@ export
 DB_URL ?= postgres://mailuser:secretpassword@localhost:5432/maildb?sslmode=disable
 DB_USER ?= mailuser
 DB_NAME ?= maildb
+DB_PORT ?= 5432
 
 .PHONY: all dev generate migrate-up migrate-down build test clean
 
@@ -13,7 +14,7 @@ dev:
 	@echo "Starting postgres container..."
 	docker compose up -d postgres
 	@echo "Waiting for postgres to be ready..."
-	@until docker exec webmail_db pg_isready -U $(DB_USER) -d $(DB_NAME) > /dev/null 2>&1; do sleep 1; done
+	@until nc -z localhost $(DB_PORT) > /dev/null 2>&1 && docker exec webmail_db pg_isready -U $(DB_USER) -d $(DB_NAME) > /dev/null 2>&1; do sleep 1; done
 	@echo "Running database migrations..."
 	$(MAKE) migrate-up
 	@echo "Generating templ and sqlc code..."

@@ -57,8 +57,7 @@ func (l *LoginInput) GetDomain() string {
 }
 
 // Login returns a token if the login is successful, otherwise returns an error.
-func (s *AuthService) Login(input LoginInput) (string, error) {
-	ctx := context.Background()
+func (s *AuthService) Login(ctx context.Context, input LoginInput) (string, error) {
 
 	if err := input.Validate(); err != nil {
 		return "", err // err here is already a proper error message
@@ -81,7 +80,7 @@ func (s *AuthService) Login(input LoginInput) (string, error) {
 		Encryption:       dbDomain.ImapEncryption,
 		AllowInsecureTLS: dbDomain.AllowInsecureTls,
 	}
-	err = imap.TestConnection(imapConfig, input.Email, input.Password)
+	err = imap.TestConnection(ctx, imapConfig, input.Email, input.Password)
 
 	if err != nil {
 		return "", ErrInvalidCredentials
