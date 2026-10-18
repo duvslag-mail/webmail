@@ -63,6 +63,7 @@ func (h *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
 		Value:    "",
+		Path:     "/",
 		HttpOnly: true,
 		Secure:   true,
 		MaxAge:   -1,
