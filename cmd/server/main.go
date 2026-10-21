@@ -12,7 +12,7 @@ import (
 	"github.com/duvlsag-mail/webmail/db/sqlc"
 	"github.com/duvlsag-mail/webmail/internal/auth"
 	"github.com/duvlsag-mail/webmail/internal/handlers"
-	"github.com/duvlsag-mail/webmail/internal/imap"
+	"github.com/duvlsag-mail/webmail/internal/mail"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -32,6 +32,10 @@ func main() {
 	dbName := os.Getenv("DB_NAME")
 
 	imapEncryptionKey, err := hex.DecodeString(os.Getenv("IMAP_ENCRYPTION_KEY"))
+
+	if err != nil {
+		log.Fatalf("failed to decode IMAP_ENCRYPTION_KEY: %v", err)
+	}
 
 	//  db setup
 	dbUrl := "postgres://" + dbUser + ":" + dbPassword + "@" + dbHost + ":" + dbPort + "/" + dbName + "?sslmode=disable"
@@ -76,7 +80,7 @@ func main() {
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
 	// create the pool
-	imapPool := imap.NewPool(auth.NewIMAPCredsLoader(queries, imapEncryptionKey), 5*time.Minute)
+	imapPool := mail.NewPool(auth.NewIMAPCredsLoader(queries, imapEncryptionKey), 5*time.Minute)
 	go imapPool.Run(ctx)
 
 	authService := auth.NewAuthService(queries, imapEncryptionKey, imapPool)

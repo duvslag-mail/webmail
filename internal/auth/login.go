@@ -10,7 +10,7 @@ import (
 
 	"github.com/duvlsag-mail/webmail/db/sqlc"
 	"github.com/duvlsag-mail/webmail/internal/crypto"
-	"github.com/duvlsag-mail/webmail/internal/imap"
+	"github.com/duvlsag-mail/webmail/internal/mail"
 )
 
 var (
@@ -74,14 +74,14 @@ func (s *AuthService) Login(ctx context.Context, input LoginInput) (string, erro
 	}
 
 	// test the connection
-	imapConfig := imap.Config{
+	imapConfig := mail.Config{
 		Host:             dbDomain.ImapHost,
 		Port:             strconv.Itoa(int(dbDomain.ImapPort)),
 		Encryption:       dbDomain.ImapEncryption,
 		AllowInsecureTLS: dbDomain.AllowInsecureTls,
 	}
 
-	imapCreds := imap.Creds{
+	imapCreds := mail.Creds{
 		Config:   imapConfig,
 		Username: input.Email,
 		Password: input.Password,

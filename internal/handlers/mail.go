@@ -1,50 +1,58 @@
 package handlers
 
 import (
-	"context"
-	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/a-h/templ"
-	"github.com/duvlsag-mail/webmail/internal/imap"
+	"github.com/duvlsag-mail/webmail/internal/mail"
+	"github.com/duvlsag-mail/webmail/templates/components"
 	"github.com/duvlsag-mail/webmail/templates/pages"
 	"github.com/emersion/go-imap/v2/imapclient"
 	"github.com/google/uuid"
 )
 
 type MailHandler struct {
-	pool *imap.Pool
+	pool *mail.Pool
 }
 
-func NewMailHandler(pool *imap.Pool) *MailHandler {
+func NewMailHandler(pool *mail.Pool) *MailHandler {
 	return &MailHandler{
 		pool: pool,
 	}
 }
 
-func (h *MailHandler) getSubjectsForUser(ctx context.Context, userID uuid.UUID) []string {
-	var subjects []string
+func (h *MailHandler) HandleList(w http.ResponseWriter, r *http.Request) {
+	// get user id injected by auth middleware in the context
+	userID := r.Context().Value(userIDKey).(uuid.UUID)
 
-	// read only, so it's safe to retry on a stale connection
-	err := h.pool.With(ctx, userID, func(c *imapclient.Client) error {
-		var err error
-		subjects, err = imap.FetchSubjects(c)
-		return err
-	}, true)
-
-	if err != nil {
-		log.Printf("fetching subjects failed: %v", err)
-		return []string{"Error fetching subjects"}
+	folder := r.URL.Query().Get("folder")
+	// uh convention ig
+	if folder == "" {
+		folder = "INBOX"
 	}
 
-	return subjects
+	before, _ := strconv.ParseInt(r.URL.Query().Get("before"), 10, 32) // default to 0 if not provided
+
+	var msgs []mail.MessageSummary
+	var next uint32
+
+	err := h.pool.With(r.Context(), userID, func(client *imapclient.Client) error {
+		var err error
+		msgs, next, err = mail.FetchPage(client, folder, uint32(before))
+		return err
+	}, true) // retry cause read only, we don't really care
+
+	if err != nil {
+		http.Error(w, "Failed to fetch messages: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	templ.Handler(components.MessageRows(folder, msgs, next)).ServeHTTP(w, r)
+
 }
 
 func (h *MailHandler) HandleHome(w http.ResponseWriter, r *http.Request) {
 
-	var userID = r.Context().Value(userIDKey)
-	subjects := h.getSubjectsForUser(r.Context(), userID.(uuid.UUID))
-
-	handler := templ.Handler(pages.Mail(subjects))
+	handler := templ.Handler(pages.Mail())
 	handler.ServeHTTP(w, r)
 }

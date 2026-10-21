@@ -1,0 +1,31 @@
+package components
+
+import (
+	"fmt"
+	"github.com/duvlsag-mail/webmail/internal/mail"
+	"net/url"
+	"time"
+)
+
+templ MessageRows(folder string, msgs []mail.MessageSummary, next uint32) {
+	for _, m := range msgs {
+		<li>
+			<span>
+				for _, a := range m.From {
+					<a href={ "mailto:" + a.Email }>{ a.Name }</a>
+				}
+			</span>
+			<span>{ m.Subject }</span>
+			<time datetime={ m.Date.Format(time.RFC3339) }>{ m.Date.Format("Jan 2, 2006 3:04 PM") }</time>
+		</li>
+	}
+	if next > 0 {
+		<li>
+			<button
+				hx-get={ fmt.Sprintf("/mail/list?folder=%s&before=%d", url.QueryEscape(folder), next) }
+				hx-trigger="click"
+				hx-swap="outerHTML"
+			>Load more</button>
+		</li>
+	}
+}

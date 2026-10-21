@@ -7,16 +7,16 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/duvlsag-mail/webmail/internal/auth"
-	"github.com/duvlsag-mail/webmail/internal/imap"
+	"github.com/duvlsag-mail/webmail/internal/mail"
 	"github.com/duvlsag-mail/webmail/templates/pages"
 )
 
 type AuthHandler struct {
 	AuthService *auth.AuthService
-	imapPool    *imap.Pool
+	imapPool    *mail.Pool
 }
 
-func NewAuthHandler(authService *auth.AuthService, imapPool *imap.Pool) *AuthHandler {
+func NewAuthHandler(authService *auth.AuthService, imapPool *mail.Pool) *AuthHandler {
 	return &AuthHandler{
 		AuthService: authService,
 		imapPool:    imapPool,

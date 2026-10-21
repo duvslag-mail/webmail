@@ -9,32 +9,32 @@ import (
 
 	"github.com/duvlsag-mail/webmail/db/sqlc"
 	"github.com/duvlsag-mail/webmail/internal/crypto"
-	"github.com/duvlsag-mail/webmail/internal/imap"
+	"github.com/duvlsag-mail/webmail/internal/mail"
 )
 
 // returns a loader that fetches and decrypts the user's imap creds
-func NewIMAPCredsLoader(db *sqlc.Queries, masterKey []byte) imap.CredsLoader {
-	return func(ctx context.Context, userID uuid.UUID) (imap.Creds, error) {
+func NewIMAPCredsLoader(db *sqlc.Queries, masterKey []byte) mail.CredsLoader {
+	return func(ctx context.Context, userID uuid.UUID) (mail.Creds, error) {
 		return loadIMAPCreds(ctx, db, masterKey, userID)
 	}
 }
 
-func loadIMAPCreds(ctx context.Context, db *sqlc.Queries, masterKey []byte, userID uuid.UUID) (imap.Creds, error) {
+func loadIMAPCreds(ctx context.Context, db *sqlc.Queries, masterKey []byte, userID uuid.UUID) (mail.Creds, error) {
 	res, err := db.GetUserWithDomain(ctx, pgtype.UUID{
 		Bytes: userID,
 		Valid: true,
 	})
 	if err != nil {
-		return imap.Creds{}, err
+		return mail.Creds{}, err
 	}
 
 	password, err := crypto.Decrypt(res.EncryptedImapPassword, masterKey)
 	if err != nil {
-		return imap.Creds{}, err
+		return mail.Creds{}, err
 	}
 
-	return imap.Creds{
-		Config: imap.Config{
+	return mail.Creds{
+		Config: mail.Config{
 			Host:             res.ImapHost,
 			Port:             strconv.Itoa(int(res.ImapPort)),
 			Encryption:       res.ImapEncryption,
