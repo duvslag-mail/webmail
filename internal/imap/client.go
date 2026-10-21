@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"net"
-	"time"
 
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
@@ -24,6 +23,17 @@ type Config struct {
 }
 
 func Connect(ctx context.Context, cfg Config) (*imapclient.Client, error) {
+	client, conn, err := dial(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	context.AfterFunc(ctx, func() { conn.Close() })
+
+	return client, nil
+}
+
+func dial(ctx context.Context, cfg Config) (*imapclient.Client, net.Conn, error) {
 	addr := net.JoinHostPort(cfg.Host, cfg.Port)
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: cfg.AllowInsecureTLS,
@@ -43,7 +53,7 @@ func Connect(ctx context.Context, cfg Config) (*imapclient.Client, error) {
 		err = ErrInvalidEncryption
 	}
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// set a deadline for everything
@@ -51,62 +61,22 @@ func Connect(ctx context.Context, cfg Config) (*imapclient.Client, error) {
 		conn.SetDeadline(deadline)
 	}
 
-	// if the context is canceled, close the connection
-	context.AfterFunc(ctx, func() { conn.Close() })
-
 	options := &imapclient.Options{TLSConfig: tlsConfig}
 	var client *imapclient.Client
 	if cfg.Encryption == "starttls" {
 		client, err = imapclient.NewStartTLS(conn, options)
 		if err != nil {
 			conn.Close()
-			return nil, err
+			return nil, nil, err
 		}
 	} else {
 		client = imapclient.New(conn, options)
 	}
 
-	return client, nil
+	return client, conn, nil
 }
 
-func login(ctx context.Context, cfg Config, username, password string) (*imapclient.Client, error) {
-	client, err := Connect(ctx, cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := client.Login(username, password).Wait(); err != nil {
-		client.Close()
-		return nil, ErrInvalidConnection
-	}
-
-	return client, nil
-}
-
-func Login(ctx context.Context, cfg Config, username, password string) error {
-	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
-	defer cancel()
-
-	client, err := login(ctx, cfg, username, password)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
-	client.Logout().Wait()
-	return nil
-}
-
-func GetSubjects(ctx context.Context, cfg Config, username, password string) ([]string, error) {
-	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
-	defer cancel()
-
-	client, err := login(ctx, cfg, username, password)
-	if err != nil {
-		return nil, err
-	}
-	defer client.Close()
-
+func FetchSubjects(client *imapclient.Client) ([]string, error) {
 	// assumes the INBOX mailbox exists, this is just wip to test things :)
 	mbox, err := client.Select("INBOX", &imap.SelectOptions{
 		ReadOnly: true,
@@ -132,7 +102,6 @@ func GetSubjects(ctx context.Context, cfg Config, username, password string) ([]
 	}
 
 	fetchCmd := client.Fetch(seqSet, &fetchOptions)
-	defer fetchCmd.Close()
 
 	var emails []string
 	for {
@@ -143,12 +112,17 @@ func GetSubjects(ctx context.Context, cfg Config, username, password string) ([]
 
 		buf, err := data.Collect()
 		if err != nil {
+			fetchCmd.Close()
 			return nil, err
 		}
 
 		if buf.Envelope != nil {
 			emails = append(emails, buf.Envelope.Subject)
 		}
+	}
+
+	if err := fetchCmd.Close(); err != nil {
+		return nil, err
 	}
 
 	return emails, nil

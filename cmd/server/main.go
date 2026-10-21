@@ -7,10 +7,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/duvlsag-mail/webmail/db/sqlc"
 	"github.com/duvlsag-mail/webmail/internal/auth"
 	"github.com/duvlsag-mail/webmail/internal/handlers"
+	"github.com/duvlsag-mail/webmail/internal/imap"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -73,11 +75,16 @@ func main() {
 	// static files
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
-	authService := auth.NewAuthService(queries, imapEncryptionKey)
-	authHandler := handlers.NewAuthHandler(authService)
+	// create the pool
+	imapPool := imap.NewPool(auth.NewIMAPCredsLoader(queries, imapEncryptionKey), 5*time.Minute)
+	go imapPool.Run(ctx)
+
+	authService := auth.NewAuthService(queries, imapEncryptionKey, imapPool)
+
+	authHandler := handlers.NewAuthHandler(authService, imapPool)
 	authHandler.RegisterRoutes(r) // public routes
 
-	mailHandler := handlers.NewMailHandler(queries, imapEncryptionKey)
+	mailHandler := handlers.NewMailHandler(imapPool)
 	r.Group(func(r chi.Router) {
 		r.Use(handlers.RequireAuth(authService))
 		mailHandler.RegisterRoutes(r)
