@@ -20,6 +20,7 @@ type Querier interface {
 	GetSessionByTokenHash(ctx context.Context, tokenHash string) (Session, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserById(ctx context.Context, id pgtype.UUID) (User, error)
+	GetUserWithDomain(ctx context.Context, id pgtype.UUID) (GetUserWithDomainRow, error)
 	UpdateSessionLastSeen(ctx context.Context, tokenHash string) (Session, error)
 	UpdateUserImapPassword(ctx context.Context, arg UpdateUserImapPasswordParams) error
 	UpsertUser(ctx context.Context, arg UpsertUserParams) (UpsertUserRow, error)

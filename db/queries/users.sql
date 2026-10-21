@@ -31,3 +31,9 @@ ON CONFLICT (email) DO UPDATE SET
     encrypted_imap_password = EXCLUDED.encrypted_imap_password,
     auth_status = 'active'
 RETURNING id, domain_id, email, auth_status, created_at;
+
+-- name: GetUserWithDomain :one
+SELECT u.email, u.encrypted_imap_password, d.imap_host, d.imap_port, d.imap_encryption, d.allow_insecure_tls
+FROM users u
+JOIN domains d ON u.domain_id = d.id
+WHERE u.id = $1;

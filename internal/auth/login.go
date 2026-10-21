@@ -80,7 +80,7 @@ func (s *AuthService) Login(ctx context.Context, input LoginInput) (string, erro
 		Encryption:       dbDomain.ImapEncryption,
 		AllowInsecureTLS: dbDomain.AllowInsecureTls,
 	}
-	err = imap.TestConnection(ctx, imapConfig, input.Email, input.Password)
+	err = imap.Login(ctx, imapConfig, input.Email, input.Password)
 
 	if err != nil {
 		return "", ErrInvalidCredentials

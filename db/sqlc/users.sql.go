@@ -86,6 +86,36 @@ func (q *Queries) GetUserById(ctx context.Context, id pgtype.UUID) (User, error)
 	return i, err
 }
 
+const getUserWithDomain = `-- name: GetUserWithDomain :one
+SELECT u.email, u.encrypted_imap_password, d.imap_host, d.imap_port, d.imap_encryption, d.allow_insecure_tls
+FROM users u
+JOIN domains d ON u.domain_id = d.id
+WHERE u.id = $1
+`
+
+type GetUserWithDomainRow struct {
+	Email                 string `json:"email"`
+	EncryptedImapPassword []byte `json:"encrypted_imap_password"`
+	ImapHost              string `json:"imap_host"`
+	ImapPort              int32  `json:"imap_port"`
+	ImapEncryption        string `json:"imap_encryption"`
+	AllowInsecureTls      bool   `json:"allow_insecure_tls"`
+}
+
+func (q *Queries) GetUserWithDomain(ctx context.Context, id pgtype.UUID) (GetUserWithDomainRow, error) {
+	row := q.db.QueryRow(ctx, getUserWithDomain, id)
+	var i GetUserWithDomainRow
+	err := row.Scan(
+		&i.Email,
+		&i.EncryptedImapPassword,
+		&i.ImapHost,
+		&i.ImapPort,
+		&i.ImapEncryption,
+		&i.AllowInsecureTls,
+	)
+	return i, err
+}
+
 const updateUserImapPassword = `-- name: UpdateUserImapPassword :exec
 UPDATE users
 SET encrypted_imap_password = $1

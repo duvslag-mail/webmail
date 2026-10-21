@@ -77,7 +77,7 @@ func main() {
 	authHandler := handlers.NewAuthHandler(authService)
 	authHandler.RegisterRoutes(r) // public routes
 
-	mailHandler := handlers.NewMailHandler()
+	mailHandler := handlers.NewMailHandler(queries, imapEncryptionKey)
 	r.Group(func(r chi.Router) {
 		r.Use(handlers.RequireAuth(authService))
 		mailHandler.RegisterRoutes(r)
