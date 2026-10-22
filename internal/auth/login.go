@@ -10,7 +10,7 @@ import (
 
 	"github.com/duvlsag-mail/webmail/db/sqlc"
 	"github.com/duvlsag-mail/webmail/internal/crypto"
-	"github.com/duvlsag-mail/webmail/internal/imap"
+	"github.com/duvlsag-mail/webmail/internal/mail"
 )
 
 var (
@@ -74,17 +74,32 @@ func (s *AuthService) Login(ctx context.Context, input LoginInput) (string, erro
 	}
 
 	// test the connection
-	imapConfig := imap.Config{
+	imapConfig := mail.Config{
 		Host:             dbDomain.ImapHost,
 		Port:             strconv.Itoa(int(dbDomain.ImapPort)),
 		Encryption:       dbDomain.ImapEncryption,
 		AllowInsecureTLS: dbDomain.AllowInsecureTls,
 	}
-	err = imap.TestConnection(ctx, imapConfig, input.Email, input.Password)
 
+	imapCreds := mail.Creds{
+		Config:   imapConfig,
+		Username: input.Email,
+		Password: input.Password,
+	}
+
+	conn, err := s.imapPool.Login(ctx, imapCreds)
+
+	// if this passes, we should be good
 	if err != nil {
 		return "", ErrInvalidCredentials
 	}
+
+	// close it if anything fails, put takes ownership so it won't be closed if that succeeds
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
 
 	// encrypt the password
 	encryptedPassword, err := crypto.Encrypt([]byte(input.Password), s.masterKey)
@@ -100,6 +115,7 @@ func (s *AuthService) Login(ctx context.Context, input LoginInput) (string, erro
 		Email:                 input.Email,
 		EncryptedImapPassword: []byte(encryptedPassword),
 	}
+
 	row, err := s.db.UpsertUser(ctx, upsertUserArgs)
 	if err != nil {
 		return "", ErrDatabaseError
@@ -115,6 +131,9 @@ func (s *AuthService) Login(ctx context.Context, input LoginInput) (string, erro
 	if err != nil {
 		return "", err
 	}
+
+	// add the connection to the pool once the session is created successfully
+	s.imapPool.Put(row.ID.Bytes, conn)
 
 	return token, nil
 }

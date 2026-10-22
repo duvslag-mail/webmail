@@ -7,16 +7,19 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/duvlsag-mail/webmail/internal/auth"
+	"github.com/duvlsag-mail/webmail/internal/mail"
 	"github.com/duvlsag-mail/webmail/templates/pages"
 )
 
 type AuthHandler struct {
 	AuthService *auth.AuthService
+	imapPool    *mail.Pool
 }
 
-func NewAuthHandler(authService *auth.AuthService) *AuthHandler {
+func NewAuthHandler(authService *auth.AuthService, imapPool *mail.Pool) *AuthHandler {
 	return &AuthHandler{
 		AuthService: authService,
+		imapPool:    imapPool,
 	}
 }
 
@@ -51,6 +54,11 @@ func (h *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 		// return a server error, who tries to logout without a token :<
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
+	}
+
+	// drop the pooled imap connection
+	if userID, err := h.AuthService.VerifySession(r.Context(), token); err == nil {
+		h.imapPool.Evict(userID)
 	}
 
 	err := h.AuthService.DeleteSession(r.Context(), token)

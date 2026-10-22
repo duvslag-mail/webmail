@@ -6,6 +6,9 @@ templ Mail() {
 	@layouts.Base("Mail", []string{"/static/css/pages/home.css"}) {
 		<div>
 			<h1>mail hii</h1>
+			<ul id="messages" hx-get="/mail/list?folder=INBOX" hx-trigger="load">
+				<li>Loading…</li>
+			</ul>
 			<form method="POST" action="/logout">
 				<button type="submit">Logout</button>
 			</form>

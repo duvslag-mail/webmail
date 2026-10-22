@@ -43,7 +43,7 @@ func Mail() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div><h1>mail hii</h1><form method=\"POST\" action=\"/logout\"><button type=\"submit\">Logout</button></form></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div><h1>mail hii</h1><ul id=\"messages\" hx-get=\"/mail/list?folder=INBOX\" hx-trigger=\"load\"><li>Loading…</li></ul><form method=\"POST\" action=\"/logout\"><button type=\"submit\">Logout</button></form></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
