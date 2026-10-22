@@ -5,20 +5,25 @@
         height: 100dvh;
     }
 
-    .mail-list,
     .mail-reader {
         overflow-y: auto;
         min-height: 0;
     }
 
     .mail-list {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        min-height: 0;
         background: var(--color-surface);
         border-right: 2px solid var(--color-border);
     }
 
+    #messages {
+        overflow-y: auto;
+        min-height: 0;
+    }
+
     .mail-list-header {
-        position: sticky;
-        top: 0;
         display: flex;
         justify-content: space-between;
         align-items: center;

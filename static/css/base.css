@@ -10,7 +10,8 @@
     }
 
     a {
-        color: var(--color-accent);
+        color: var(--color-ink);
+        text-decoration: none;
     }
 
     button {
@@ -24,5 +25,9 @@
 
     button:hover {
         background-color: var(--color-surface-hover);
+    }
+
+    button:active {
+        background-color: var(--color-border);
     }
 }

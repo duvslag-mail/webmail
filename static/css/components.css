@@ -41,4 +41,13 @@
     .message-row-item:hover {
         background-color: var(--color-surface-hover);
     }
+    .message-row-item-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    .message-row-item-author {
+        color: var(--color-accent);
+        text-decoration: underline;
+    }
 }

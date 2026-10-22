@@ -33,9 +33,7 @@
             --color-surface: oklch(19% 0.008 var(--hue-primary));
             --color-ink: oklch(92% 0.006 var(--hue-primary));
             --color-muted: oklch(68% 0.01 var(--hue-primary));
-            --color-border: oklch(
-                26% 0.01 var(--hue-primary)
-            ); /* subtle, borders are 1/2px */
+            --color-border: oklch(26% 0.01 var(--hue-primary));
 
             --color-accent: oklch(74% 0.12 var(--hue-primary));
             --color-success: oklch(74% 0.13 var(--hue-success));
