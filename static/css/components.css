@@ -31,15 +31,18 @@
     }
 
     /* message row */
+    .message-row {
+        display: block; /* <a> is inline, so its background wouldn't wrap the row */
+    }
+    .message-row:hover {
+        background-color: var(--color-surface-hover);
+    }
     .message-row-item {
         border-bottom: 1px solid var(--color-border);
         padding: 0.5rem 1rem;
     }
     .message-row-item-subject {
         font-weight: 600;
-    }
-    .message-row-item:hover {
-        background-color: var(--color-surface-hover);
     }
     .message-row-item-header {
         display: flex;
@@ -49,5 +52,13 @@
     .message-row-item-author {
         color: var(--color-accent);
         text-decoration: underline;
+    }
+    .message-row[aria-current="true"] {
+        background: color-mix(
+            in oklch,
+            var(--color-surface),
+            var(--color-accent) 12%
+        );
+        box-shadow: inset 4px 0 0 var(--color-accent); /* unlike a border, doesn't push the content */
     }
 }

@@ -11,5 +11,6 @@ func (h *AuthHandler) RegisterRoutes(r chi.Router) {
 
 func (h *MailHandler) RegisterRoutes(r chi.Router) {
 	r.Get("/mail", h.HandleHome)
-	r.Get("/mail/list", h.HandleList)
+	r.Get("/mail/list", h.HandleMessageList)
+	r.Get("/mail/view", h.HandleMessageView)
 }

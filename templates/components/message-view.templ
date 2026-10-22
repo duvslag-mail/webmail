@@ -1,0 +1,7 @@
+package components
+
+import "github.com/duvlsag-mail/webmail/internal/mail"
+
+templ MessageView(message mail.Message) {
+	<iframe class="message-view" srcdoc={ message.HTMLBody }></iframe>
+}
