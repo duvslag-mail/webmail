@@ -8,3 +8,7 @@
 input {
     min-width: 30ch;
 }
+
+.submit-button {
+    margin-top: 0.5rem;
+}

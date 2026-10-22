@@ -97,7 +97,7 @@ func LoginForm(errorMessage string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"flex column\"><div class=\"flex column\"><label>Email</label> <input type=\"text\" name=\"email\" autocomplete=\"none\" required></div><div class=\"column flex\"><label>Password</label> <input type=\"password\" name=\"password\" required></div></div><button type=\"submit\">log in</button></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"flex column\"><div class=\"flex column\"><label>Email</label> <input type=\"text\" name=\"email\" autocomplete=\"none\" required></div><div class=\"column flex\"><label>Password</label> <input type=\"password\" name=\"password\" required></div></div><button type=\"submit\" class=\"submit-button\">log in</button></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

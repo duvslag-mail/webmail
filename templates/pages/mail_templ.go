@@ -43,13 +43,13 @@ func Mail() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div><h1>mail hii</h1><ul id=\"messages\" hx-get=\"/mail/list?folder=INBOX\" hx-trigger=\"load\"><li>Loading…</li></ul><form method=\"POST\" action=\"/logout\"><button type=\"submit\">Logout</button></form></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"mail-layout\"><section class=\"mail-list\"><header class=\"mail-list-header\"><h1>Inbox</h1><form method=\"POST\" action=\"/logout\"><button type=\"submit\">Logout</button></form></header><div id=\"messages\" hx-get=\"/mail/list?folder=INBOX\" hx-trigger=\"load\"><div class=\"mail-loading\"><p>Loading…</p></div></div></section><section id=\"reader\" class=\"mail-reader\"><p class=\"mail-reader-empty\">Select a message to read</p></section></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Base("Mail", []string{"/static/css/pages/home.css"}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Base("Mail", []string{"/static/css/pages/mail.css"}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

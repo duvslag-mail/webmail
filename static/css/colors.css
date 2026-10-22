@@ -17,23 +17,29 @@
         --color-danger: oklch(52% 0.22 var(--hue-danger));
         --color-warning: oklch(62% 0.18 var(--hue-warning));
         --color-info: oklch(55% 0.18 var(--hue-info));
+
+        --color-surface-hover: color-mix(
+            in oklch,
+            var(--color-surface),
+            var(--color-ink) 5%
+        );
+
+        color-scheme: light dark;
     }
 
     @media (prefers-color-scheme: dark) {
         :root {
-            --color-canvas: oklch(
-                14% 0.02 var(--hue-primary)
-            ); /* Fixed chroma 0.2 -> 0.02 */
-            --color-surface: oklch(18% 0.02 var(--hue-primary));
-            --color-ink: oklch(95% 0.01 var(--hue-primary));
-            --color-muted: oklch(70% 0.02 var(--hue-primary));
-            --color-border: oklch(28% 0.02 var(--hue-primary));
+            --color-canvas: oklch(16% 0.006 var(--hue-primary));
+            --color-surface: oklch(19% 0.008 var(--hue-primary));
+            --color-ink: oklch(92% 0.006 var(--hue-primary));
+            --color-muted: oklch(68% 0.01 var(--hue-primary));
+            --color-border: oklch(26% 0.01 var(--hue-primary));
 
-            --color-accent: oklch(70% 0.16 var(--hue-primary));
-            --color-success: oklch(70% 0.16 var(--hue-success));
-            --color-danger: oklch(68% 0.18 var(--hue-danger));
-            --color-warning: oklch(75% 0.16 var(--hue-warning));
-            --color-info: oklch(72% 0.16 var(--hue-info));
+            --color-accent: oklch(74% 0.12 var(--hue-primary));
+            --color-success: oklch(74% 0.13 var(--hue-success));
+            --color-danger: oklch(70% 0.14 var(--hue-danger));
+            --color-warning: oklch(80% 0.12 var(--hue-warning));
+            --color-info: oklch(74% 0.11 var(--hue-info));
         }
     }
 }

@@ -3,15 +3,24 @@ package pages
 import "github.com/duvlsag-mail/webmail/templates/layouts"
 
 templ Mail() {
-	@layouts.Base("Mail", []string{"/static/css/pages/home.css"}) {
-		<div>
-			<h1>mail hii</h1>
-			<ul id="messages" hx-get="/mail/list?folder=INBOX" hx-trigger="load">
-				<li>Loading…</li>
-			</ul>
-			<form method="POST" action="/logout">
-				<button type="submit">Logout</button>
-			</form>
+	@layouts.Base("Mail", []string{"/static/css/pages/mail.css"}) {
+		<div class="mail-layout">
+			<section class="mail-list">
+				<header class="mail-list-header">
+					<h1>Inbox</h1>
+					<form method="POST" action="/logout">
+						<button type="submit">Logout</button>
+					</form>
+				</header>
+				<div id="messages" hx-get="/mail/list?folder=INBOX" hx-trigger="load">
+					<div class="mail-loading">
+						<p>Loading…</p>
+					</div>
+				</div>
+			</section>
+			<section id="reader" class="mail-reader">
+				<p class="mail-reader-empty">Select a message to read</p>
+			</section>
 		</div>
 	}
 }

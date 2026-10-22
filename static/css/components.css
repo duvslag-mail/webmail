@@ -29,4 +29,25 @@
     .alert--info {
         --intent: var(--color-info);
     }
+
+    /* message row */
+    .message-row-item {
+        border-bottom: 1px solid var(--color-border);
+        padding: 0.5rem 1rem;
+    }
+    .message-row-item-subject {
+        font-weight: 600;
+    }
+    .message-row-item:hover {
+        background-color: var(--color-surface-hover);
+    }
+    .message-row-item-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    .message-row-item-author {
+        color: var(--color-accent);
+        text-decoration: underline;
+    }
 }

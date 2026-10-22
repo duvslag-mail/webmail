@@ -1,0 +1,70 @@
+@layer pages {
+    .mail-layout {
+        display: grid;
+        grid-template-columns: minmax(20rem, 28rem) 1fr;
+        height: 100dvh;
+    }
+
+    .mail-reader {
+        overflow-y: auto;
+        min-height: 0;
+    }
+
+    .mail-list {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        min-height: 0;
+        background: var(--color-surface);
+        border-right: 2px solid var(--color-border);
+    }
+
+    #messages {
+        overflow-y: auto;
+        min-height: 0;
+    }
+
+    .mail-list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: var(--color-surface);
+        border-bottom: 2px solid var(--color-border);
+    }
+
+    .mail-reader {
+        padding: 1.5rem;
+    }
+
+    .mail-loading {
+        padding: 1rem;
+    }
+
+    .message-row-load-more {
+        margin: 1rem;
+    }
+
+    .mail-reader-empty {
+        color: var(--color-muted);
+        display: grid;
+        place-items: center;
+        height: 100%;
+    }
+
+    /* responsive design...? */
+    @media (max-width: 48rem) {
+        .mail-layout {
+            grid-template-columns: 1fr;
+        }
+        .mail-reader {
+            display: none;
+        }
+
+        .mail-layout:has(#reader > article) .mail-list {
+            display: none;
+        }
+        .mail-layout:has(#reader > article) .mail-reader {
+            display: block;
+        }
+    }
+}
