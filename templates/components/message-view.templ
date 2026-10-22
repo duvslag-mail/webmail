@@ -2,6 +2,44 @@ package components
 
 import "github.com/duvlsag-mail/webmail/internal/mail"
 
+func formatAddress(a mail.Address) string {
+	if a.Name == "" {
+		return a.Email
+	}
+	return a.Name + " <" + a.Email + ">"
+}
+
+templ addressLine(label string, addrs []mail.Address) {
+	if len(addrs) > 0 {
+		<p>
+			{ label }
+			for i, a := range addrs {
+				if i > 0 {
+					{ ", " }
+				}
+				<span class="message-view-adress">{ formatAddress(a) }</span>
+			}
+		</p>
+	}
+}
+
 templ MessageView(message mail.Message) {
-	<iframe class="message-view" srcdoc={ message.HTMLBody }></iframe>
+	<div>
+		<div class="message-view-header">
+			<h2>{ message.Subject }</h2>
+			<div>
+				@addressLine("From", message.From)
+				@addressLine("To", message.To)
+				@addressLine("Cc", message.Cc)
+			</div>
+			<div class="message-view-buttons">
+				<fieldset class="message-body-toggle">
+					<legend class="visually-hidden">Show as</legend>
+					<label><input type="radio" name="body-mode" value="html" checked/> HTML</label>
+					<label><input type="radio" name="body-mode" value="text"/> Plain text</label>
+				</fieldset>
+			</div>
+		</div>
+		<iframe class="message-view" sandbox srcdoc={ message.HTMLBody }></iframe>
+	</div>
 }
