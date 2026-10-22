@@ -9,23 +9,25 @@ import (
 
 templ MessageRows(folder string, msgs []mail.MessageSummary, next uint32) {
 	for _, m := range msgs {
-		<li>
-			<span>
-				for _, a := range m.From {
-					<a href={ "mailto:" + a.Email }>{ a.Name }</a>
-				}
-			</span>
-			<span>{ m.Subject }</span>
-			<time datetime={ m.Date.Format(time.RFC3339) }>{ m.Date.Format("Jan 2, 2006 3:04 PM") }</time>
-		</li>
+		<div class="message-row-item">
+			<div class="message-row-item-header">
+				<span>
+					for _, a := range m.From {
+						<a href={ "mailto:" + a.Email }>{ a.Name }</a>
+					}
+				</span>
+				<time datetime={ m.Date.Format(time.RFC3339) }>{ m.Date.Format("Jan 2, 2006 3:04 PM") }</time>
+			</div>
+			<span class="message-row-item-subject">{ m.Subject }</span>
+		</div>
 	}
 	if next > 0 {
-		<li>
+		<div>
 			<button
 				hx-get={ fmt.Sprintf("/mail/list?folder=%s&before=%d", url.QueryEscape(folder), next) }
 				hx-trigger="click"
 				hx-swap="outerHTML"
 			>Load more</button>
-		</li>
+		</div>
 	}
 }
