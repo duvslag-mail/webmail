@@ -22,12 +22,11 @@ templ MessageRows(folder string, msgs []mail.MessageSummary, next uint32) {
 		</div>
 	}
 	if next > 0 {
-		<div>
-			<button
-				hx-get={ fmt.Sprintf("/mail/list?folder=%s&before=%d", url.QueryEscape(folder), next) }
-				hx-trigger="click"
-				hx-swap="outerHTML"
-			>Load more</button>
-		</div>
+		<button
+			hx-get={ fmt.Sprintf("/mail/list?folder=%s&before=%d", url.QueryEscape(folder), next) }
+			hx-trigger="click"
+			hx-swap="outerHTML"
+			class="message-row-load-more"
+		>Load more</button>
 	}
 }

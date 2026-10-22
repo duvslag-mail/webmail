@@ -38,4 +38,7 @@
     .message-row-item-subject {
         font-weight: 600;
     }
+    .message-row-item:hover {
+        background-color: var(--color-surface-hover);
+    }
 }

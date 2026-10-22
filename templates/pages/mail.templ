@@ -13,7 +13,9 @@ templ Mail() {
 					</form>
 				</header>
 				<div id="messages" hx-get="/mail/list?folder=INBOX" hx-trigger="load">
-					<p>Loading…</p>
+					<div class="mail-loading">
+						<p>Loading…</p>
+					</div>
 				</div>
 			</section>
 			<section id="reader" class="mail-reader">
