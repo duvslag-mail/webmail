@@ -97,6 +97,12 @@
         padding: 0.5rem;
         background: var(--color-surface);
     }
+    .message-body-toggle > span {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+    }
     .message-body-toggle:hover {
         background: var(--color-surface-hover);
     }

@@ -2,6 +2,7 @@ package components
 
 import (
 	"fmt"
+	"github.com/duvlsag-mail/webmail/internal/icons"
 	"github.com/duvlsag-mail/webmail/internal/mail"
 	"net/url"
 )
@@ -30,7 +31,9 @@ templ addressLine(label string, addrs []mail.Address) {
 templ MessageView(message mail.Message, folder string, allowImages bool) {
 	<article class="message-view">
 		<div class="message-view-mobile-actions">
-			<button type="button" class="message-view-mobile-back">Back to list</button>
+			<button type="button" class="message-view-mobile-back">
+				@icons.Icon("chevron-left")
+			</button>
 		</div>
 		<div class="message-view-header">
 			<h2>{ message.Subject }</h2>
@@ -43,8 +46,8 @@ templ MessageView(message mail.Message, folder string, allowImages bool) {
 				if message.HTMLBody != "" && message.TextBody != "" {
 					<label class="message-body-toggle">
 						<input type="checkbox" class="visually-hidden"/>
-						<span class="when-html">Show plain text</span>
-						<span class="when-text">Show HTML</span>
+						<span class="when-html">@icons.Icon("text-align-start") Show plain text</span>
+						<span class="when-text">@icons.Icon("book-open") Show HTML</span>
 					</label>
 				}
 				if message.HTMLBody != "" && !allowImages {
@@ -56,7 +59,7 @@ templ MessageView(message mail.Message, folder string, allowImages bool) {
 						hx-select-oob="#message-buttons"
 						hx-swap="outerHTML"
 					>
-						Load images
+						@icons.Icon("images") Load images
 					</button>
 				}
 			</div>

@@ -1,6 +1,7 @@
 package pages
 
 import "github.com/duvlsag-mail/webmail/templates/layouts"
+import "github.com/duvlsag-mail/webmail/internal/icons"
 
 templ Mail() {
 	@layouts.Base("Mail", []string{"/static/css/pages/mail.css"}) {
@@ -9,7 +10,7 @@ templ Mail() {
 				<header class="mail-list-header">
 					<h1>Inbox</h1>
 					<form method="POST" action="/logout">
-						<button type="submit">Logout</button>
+						<button type="submit">@icons.Icon("log-out")</button>
 					</form>
 				</header>
 				<div id="messages" hx-get="/mail/list?folder=INBOX" hx-trigger="load">

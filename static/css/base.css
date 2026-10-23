@@ -21,6 +21,10 @@
         padding: 0.5rem 0.5rem;
         border-radius: 0.5rem;
         cursor: pointer;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     button:hover {
