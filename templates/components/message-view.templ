@@ -1,6 +1,10 @@
 package components
 
-import "github.com/duvlsag-mail/webmail/internal/mail"
+import (
+	"fmt"
+	"github.com/duvlsag-mail/webmail/internal/mail"
+	"net/url"
+)
 
 func formatAddress(a mail.Address) string {
 	if a.Name == "" {
@@ -23,8 +27,11 @@ templ addressLine(label string, addrs []mail.Address) {
 	}
 }
 
-templ MessageView(message mail.Message) {
-	<div class="message-view">
+templ MessageView(message mail.Message, folder string, allowImages bool) {
+	<article class="message-view">
+		<div class="message-view-mobile-actions">
+			<button type="button" class="message-view-mobile-back">Back to list</button>
+		</div>
 		<div class="message-view-header">
 			<h2>{ message.Subject }</h2>
 			<div>
@@ -32,7 +39,7 @@ templ MessageView(message mail.Message) {
 				@addressLine("To", message.To)
 				@addressLine("Cc", message.Cc)
 			</div>
-			<div class="message-view-buttons">
+			<div class="message-view-buttons" id="message-buttons">
 				if message.HTMLBody != "" && message.TextBody != "" {
 					<label class="message-body-toggle">
 						<input type="checkbox" class="visually-hidden"/>
@@ -40,17 +47,29 @@ templ MessageView(message mail.Message) {
 						<span class="when-text">Show HTML</span>
 					</label>
 				}
+				if message.HTMLBody != "" && !allowImages {
+					<button
+						class="message-view-allow-images"
+						hx-get={ fmt.Sprintf("/mail/view?folder=%s&id=%d&allowImages=1", url.QueryEscape(folder), message.UID) }
+						hx-target="#message-body"
+						hx-select="#message-body"
+						hx-select-oob="#message-buttons"
+						hx-swap="outerHTML"
+					>
+						Load images
+					</button>
+				}
 			</div>
 		</div>
-		<div class="message-view-body">
+		<div class="message-view-body" id="message-body">
 			if message.TextBody != "" {
 				<div class="message-view-body-text">{ message.TextBody }</div>
 			}
 			if message.HTMLBody != "" {
 				<div class="message-view-body-html">
-					<iframe sandbox srcdoc={ message.HTMLBody }></iframe>
+					<iframe sandbox srcdoc={ mail.SanitizeHTML(message.HTMLBody, allowImages) }></iframe>
 				</div>
 			}
 		</div>
-	</div>
+	</article>
 }

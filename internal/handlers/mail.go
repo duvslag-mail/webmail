@@ -65,6 +65,9 @@ func (h *MailHandler) HandleMessageView(w http.ResponseWriter, r *http.Request) 
 		folder = "INBOX"
 	}
 
+	allowImagesInt := r.URL.Query().Get("allowImages")
+	allowImages := allowImagesInt == "1" || allowImagesInt == "true"
+
 	var msg mail.Message
 	err = h.pool.With(r.Context(), userID, func(client *imapclient.Client) error {
 		var err error
@@ -77,7 +80,7 @@ func (h *MailHandler) HandleMessageView(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	templ.Handler(components.MessageView(msg)).ServeHTTP(w, r)
+	templ.Handler(components.MessageView(msg, folder, allowImages)).ServeHTTP(w, r)
 }
 
 func (h *MailHandler) HandleHome(w http.ResponseWriter, r *http.Request) {
