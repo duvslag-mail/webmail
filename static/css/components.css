@@ -69,7 +69,51 @@
         gap: 0.5rem;
         border-bottom: 1px solid var(--color-border);
     }
-    .message-view-adress {
+    .message-view-address {
         color: var(--color-accent);
+    }
+
+    .message-body-toggle {
+        cursor: pointer;
+        border: 1px solid var(--color-border);
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        background: var(--color-surface);
+    }
+    .message-body-toggle:hover {
+        background: var(--color-surface-hover);
+    }
+    .message-body-toggle:active {
+        background: var(--color-border);
+    }
+    .message-body-toggle:has(input:focus-visible) {
+        outline: 2px solid var(--color-accent);
+    }
+    .message-view-buttons {
+        display: flex;
+        flex-direction: row;
+        margin-top: 0.5rem;
+    }
+
+    .message-view-body-text {
+        background-color: var(--color-surface);
+        border-radius: 0.5rem;
+        margin: 1rem;
+        padding: 0.5rem;
+        border: 1px solid var(--color-border);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    .message-view:has(.message-body-toggle input:not(:checked))
+        .message-view-body-text,
+    .message-view:has(.message-body-toggle input:checked)
+        .message-view-body-html {
+        display: none;
+    }
+
+    .message-body-toggle input:checked ~ .when-html,
+    .message-body-toggle input:not(:checked) ~ .when-text {
+        display: none;
     }
 }

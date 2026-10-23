@@ -30,4 +30,8 @@
     button:active {
         background-color: var(--color-border);
     }
+
+    .visually-hidden {
+        display: none;
+    }
 }

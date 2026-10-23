@@ -17,14 +17,14 @@ templ addressLine(label string, addrs []mail.Address) {
 				if i > 0 {
 					{ ", " }
 				}
-				<span class="message-view-adress">{ formatAddress(a) }</span>
+				<span class="message-view-address">{ formatAddress(a) }</span>
 			}
 		</p>
 	}
 }
 
 templ MessageView(message mail.Message) {
-	<div>
+	<div class="message-view">
 		<div class="message-view-header">
 			<h2>{ message.Subject }</h2>
 			<div>
@@ -33,13 +33,24 @@ templ MessageView(message mail.Message) {
 				@addressLine("Cc", message.Cc)
 			</div>
 			<div class="message-view-buttons">
-				<fieldset class="message-body-toggle">
-					<legend class="visually-hidden">Show as</legend>
-					<label><input type="radio" name="body-mode" value="html" checked/> HTML</label>
-					<label><input type="radio" name="body-mode" value="text"/> Plain text</label>
-				</fieldset>
+				if message.HTMLBody != "" && message.TextBody != "" {
+					<label class="message-body-toggle">
+						<input type="checkbox" class="visually-hidden"/>
+						<span class="when-html">Show plain text</span>
+						<span class="when-text">Show HTML</span>
+					</label>
+				}
 			</div>
 		</div>
-		<iframe class="message-view" sandbox srcdoc={ message.HTMLBody }></iframe>
+		<div class="message-view-body">
+			if message.TextBody != "" {
+				<div class="message-view-body-text">{ message.TextBody }</div>
+			}
+			if message.HTMLBody != "" {
+				<div class="message-view-body-html">
+					<iframe sandbox srcdoc={ message.HTMLBody }></iframe>
+				</div>
+			}
+		</div>
 	</div>
 }
