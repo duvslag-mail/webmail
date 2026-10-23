@@ -2,7 +2,6 @@ package mail
 
 import "github.com/microcosm-cc/bluemonday"
 
-// form-action and base-uri don't fall back to default-src, so they need to be set too
 const (
 	emailCSP           = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: cid:; style-src 'unsafe-inline'; font-src data:; form-action 'none'; base-uri 'none'">`
 	emailCSPWithImages = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https: data: cid:; style-src 'unsafe-inline'; font-src data:; form-action 'none'; base-uri 'none'">`
@@ -11,7 +10,6 @@ const (
 	noReferrer = `<meta name="referrer" content="no-referrer">`
 )
 
-// built once, a finished policy is safe to use from multiple goroutines
 var policy = emailPolicy()
 
 func emailPolicy() *bluemonday.Policy {

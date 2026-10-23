@@ -62,6 +62,9 @@
         .mail-layout:has(#reader > article) .mail-reader {
             display: block;
         }
+        .message-view-mobile-actions {
+            display: block;
+        }
     }
 
     iframe {
