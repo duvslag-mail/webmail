@@ -31,15 +31,18 @@
     }
 
     /* message row */
+    .message-row {
+        display: block; /* <a> is inline, so its background wouldn't wrap the row */
+    }
+    .message-row:hover {
+        background-color: var(--color-surface-hover);
+    }
     .message-row-item {
         border-bottom: 1px solid var(--color-border);
         padding: 0.5rem 1rem;
     }
     .message-row-item-subject {
         font-weight: 600;
-    }
-    .message-row-item:hover {
-        background-color: var(--color-surface-hover);
     }
     .message-row-item-header {
         display: flex;
@@ -48,6 +51,93 @@
     }
     .message-row-item-author {
         color: var(--color-accent);
-        text-decoration: underline;
+    }
+    .message-row[aria-current="true"] {
+        background: color-mix(
+            in oklch,
+            var(--color-surface),
+            var(--color-accent) 12%
+        );
+        box-shadow: inset 4px 0 0 var(--color-accent); /* unlike a border, doesn't push the content */
+    }
+
+    /* message view */
+    .message-view {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 0;
+    }
+    .message-view-body {
+        flex: 1;
+        display: grid;
+        min-height: 0;
+        overflow-y: auto;
+    }
+    .message-view-mobile-actions {
+        display: none; /* only shown on small screens, see mail.css */
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid var(--color-border);
+    }
+    .message-view-header {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        border-bottom: 1px solid var(--color-border);
+    }
+    .message-view-address {
+        color: var(--color-accent);
+    }
+
+    .message-body-toggle {
+        cursor: pointer;
+        border: 1px solid var(--color-border);
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        background: var(--color-surface);
+    }
+    .message-body-toggle > span {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .message-body-toggle:hover {
+        background: var(--color-surface-hover);
+    }
+    .message-body-toggle:active {
+        background: var(--color-border);
+    }
+    .message-body-toggle:has(input:focus-visible) {
+        outline: 2px solid var(--color-accent);
+    }
+    .message-view-buttons {
+        display: flex;
+        flex-direction: row;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .message-view-body-text {
+        background-color: var(--color-surface);
+        border-radius: 0.5rem;
+        margin: 1rem;
+        padding: 0.5rem;
+        border: 1px solid var(--color-border);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    .message-view:has(.message-body-toggle input:not(:checked))
+        .message-view-body-text,
+    .message-view:has(.message-body-toggle input:checked)
+        .message-view-body-html {
+        display: none;
+    }
+
+    .message-body-toggle input:checked ~ .when-html,
+    .message-body-toggle input:not(:checked) ~ .when-text {
+        display: none;
     }
 }

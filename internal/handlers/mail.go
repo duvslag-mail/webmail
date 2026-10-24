@@ -22,7 +22,7 @@ func NewMailHandler(pool *mail.Pool) *MailHandler {
 	}
 }
 
-func (h *MailHandler) HandleList(w http.ResponseWriter, r *http.Request) {
+func (h *MailHandler) HandleMessageList(w http.ResponseWriter, r *http.Request) {
 	// get user id injected by auth middleware in the context
 	userID := r.Context().Value(userIDKey).(uuid.UUID)
 
@@ -48,7 +48,39 @@ func (h *MailHandler) HandleList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	templ.Handler(components.MessageRows(folder, msgs, next)).ServeHTTP(w, r)
+}
 
+func (h *MailHandler) HandleMessageView(w http.ResponseWriter, r *http.Request) {
+	// get user id injected by auth middleware in the context
+	userID := r.Context().Value(userIDKey).(uuid.UUID)
+
+	uid, err := strconv.ParseUint(r.URL.Query().Get("id"), 10, 32)
+	if err != nil {
+		http.Error(w, "Invalid message UID", http.StatusBadRequest)
+		return
+	}
+
+	folder := r.URL.Query().Get("folder")
+	if folder == "" {
+		folder = "INBOX"
+	}
+
+	allowImagesInt := r.URL.Query().Get("allowImages")
+	allowImages := allowImagesInt == "1" || allowImagesInt == "true"
+
+	var msg mail.Message
+	err = h.pool.With(r.Context(), userID, func(client *imapclient.Client) error {
+		var err error
+		msg, err = mail.FetchMessage(client, folder, uint32(uid))
+		return err
+	}, true) // retry cause read only, we don't really care
+
+	if err != nil {
+		http.Error(w, "Failed to fetch message: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	templ.Handler(components.MessageView(msg, folder, allowImages)).ServeHTTP(w, r)
 }
 
 func (h *MailHandler) HandleHome(w http.ResponseWriter, r *http.Request) {

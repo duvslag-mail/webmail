@@ -9,12 +9,16 @@ import (
 
 templ MessageRows(folder string, msgs []mail.MessageSummary, next uint32) {
 	for _, m := range msgs {
-		<a class="message-row" href={ fmt.Sprintf("/mail/view/%s/%d", url.QueryEscape(folder), m.UID) }>
+		<a class="message-row" hx-get={ fmt.Sprintf("/mail/view?folder=%s&id=%d", url.QueryEscape(folder), m.UID) } hx-trigger="click" hx-target="#reader" hx-swap="innerHTML">
 			<div class="message-row-item">
 				<div class="message-row-item-header">
 					<span class="message-row-item-author">
 						for _, addr := range m.From {
-							{ addr.Name }
+							if addr.Name != "" {
+								{ addr.Name }
+							} else {
+								{ addr.Email }
+							}
 						}
 					</span>
 					<time datetime={ m.Date.Format(time.RFC3339) }>{ m.Date.Format("Jan 2, 2006 3:04 PM") }</time>

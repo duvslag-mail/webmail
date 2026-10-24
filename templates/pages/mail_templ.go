@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/duvlsag-mail/webmail/templates/layouts"
+import "github.com/duvlsag-mail/webmail/internal/icons"
 
 func Mail() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -43,7 +44,15 @@ func Mail() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"mail-layout\"><section class=\"mail-list\"><header class=\"mail-list-header\"><h1>Inbox</h1><form method=\"POST\" action=\"/logout\"><button type=\"submit\">Logout</button></form></header><div id=\"messages\" hx-get=\"/mail/list?folder=INBOX\" hx-trigger=\"load\"><div class=\"mail-loading\"><p>Loading…</p></div></div></section><section id=\"reader\" class=\"mail-reader\"><p class=\"mail-reader-empty\">Select a message to read</p></section></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"mail-layout\"><section class=\"mail-list\"><header class=\"mail-list-header\"><h1>Inbox</h1><form method=\"POST\" action=\"/logout\"><button type=\"submit\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = icons.Icon("log-out").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</button></form></header><div id=\"messages\" hx-get=\"/mail/list?folder=INBOX\" hx-trigger=\"load\"><div class=\"mail-loading\"><p>Loading…</p></div></div></section><section id=\"reader\" class=\"mail-reader\"><p class=\"mail-reader-empty\">Select a message to read</p></section></div><script src=\"/static/js/mail.js\" defer></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

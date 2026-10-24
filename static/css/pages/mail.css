@@ -32,10 +32,6 @@
         border-bottom: 2px solid var(--color-border);
     }
 
-    .mail-reader {
-        padding: 1.5rem;
-    }
-
     .mail-loading {
         padding: 1rem;
     }
@@ -66,5 +62,14 @@
         .mail-layout:has(#reader > article) .mail-reader {
             display: block;
         }
+        .message-view-mobile-actions {
+            display: block;
+        }
+    }
+
+    iframe {
+        border: none;
+        width: 100%;
+        height: 100%;
     }
 }
