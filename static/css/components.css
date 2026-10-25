@@ -5,12 +5,13 @@
         --intent: var(--color-accent);
 
         background-color: color-mix(
-            in oklch,
-            var(--intent) 10%,
+            in oklab,
+            var(--intent) 12%,
             var(--color-surface)
         );
-        color: color-mix(in oklch, var(--intent) 85%, var(--color-ink));
-        border: 1px solid color-mix(in oklch, var(--intent) 30%, transparent);
+        color: var(--intent);
+        border: 1px solid
+            color-mix(in oklab, var(--intent) 35%, var(--color-surface));
 
         padding: 0.25rem;
         border-radius: 2px;
