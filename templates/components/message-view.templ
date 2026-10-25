@@ -1,0 +1,78 @@
+package components
+
+import (
+	"fmt"
+	"github.com/duvlsag-mail/webmail/internal/icons"
+	"github.com/duvlsag-mail/webmail/internal/mail"
+	"net/url"
+)
+
+func formatAddress(a mail.Address) string {
+	if a.Name == "" {
+		return a.Email
+	}
+	return a.Name + " <" + a.Email + ">"
+}
+
+templ addressLine(label string, addrs []mail.Address) {
+	if len(addrs) > 0 {
+		<p>
+			{ label }
+			for i, a := range addrs {
+				if i > 0 {
+					{ ", " }
+				}
+				<span class="message-view-address">{ formatAddress(a) }</span>
+			}
+		</p>
+	}
+}
+
+templ MessageView(message mail.Message, folder string, allowImages bool) {
+	<article class="message-view">
+		<div class="message-view-mobile-actions">
+			<button type="button" class="message-view-mobile-back">
+				@icons.Icon("chevron-left")
+			</button>
+		</div>
+		<div class="message-view-header">
+			<h2>{ message.Subject }</h2>
+			<div>
+				@addressLine("From", message.From)
+				@addressLine("To", message.To)
+				@addressLine("Cc", message.Cc)
+			</div>
+			<div class="message-view-buttons" id="message-buttons">
+				if message.HTMLBody != "" && message.TextBody != "" {
+					<label class="message-body-toggle">
+						<input type="checkbox" class="visually-hidden"/>
+						<span class="when-html">@icons.Icon("text-align-start") Show plain text</span>
+						<span class="when-text">@icons.Icon("book-open") Show HTML</span>
+					</label>
+				}
+				if message.HTMLBody != "" && !allowImages {
+					<button
+						class="message-view-allow-images"
+						hx-get={ fmt.Sprintf("/mail/view?folder=%s&id=%d&allowImages=1", url.QueryEscape(folder), message.UID) }
+						hx-target="#message-body"
+						hx-select="#message-body"
+						hx-select-oob="#message-buttons"
+						hx-swap="outerHTML"
+					>
+						@icons.Icon("images") Load images
+					</button>
+				}
+			</div>
+		</div>
+		<div class="message-view-body" id="message-body">
+			if message.TextBody != "" {
+				<div class="message-view-body-text">{ message.TextBody }</div>
+			}
+			if message.HTMLBody != "" {
+				<div class="message-view-body-html">
+					<iframe sandbox srcdoc={ mail.SanitizeHTML(message.HTMLBody, allowImages) }></iframe>
+				</div>
+			}
+		</div>
+	</article>
+}

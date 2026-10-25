@@ -7,7 +7,7 @@
         --hue-info: 240;
 
         --color-canvas: oklch(98% 0.01 var(--hue-primary));
-        --color-surface: oklch(100% 0 0);
+        --color-surface: oklch(100% 0 var(--hue-primary));
         --color-ink: oklch(20% 0.02 var(--hue-primary));
         --color-muted: oklch(55% 0.02 var(--hue-primary));
         --color-border: oklch(90% 0.02 var(--hue-primary));

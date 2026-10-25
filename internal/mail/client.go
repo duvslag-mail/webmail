@@ -1,18 +1,24 @@
 package mail
 
 import (
+	"bytes"
 	"cmp"
 	"context"
 	"crypto/tls"
 	"errors"
+	"io"
 	"net"
 	"slices"
 
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
+	"github.com/emersion/go-message"
+	gomail "github.com/emersion/go-message/mail"
 )
 
 const pageSize = 50
+
+var ErrMessageNotFound = errors.New("message not found")
 
 var (
 	ErrInvalidConnection = errors.New("invalid connection")
@@ -152,4 +158,109 @@ func toAddresses(in []imap.Address) []Address {
 		out = append(out, Address{Name: a.Name, Email: a.Addr()})
 	}
 	return out
+}
+
+func FetchMessage(c *imapclient.Client, folder string, uid uint32) (Message, error) {
+	if _, err := c.Select(folder, &imap.SelectOptions{ReadOnly: true}).Wait(); err != nil {
+		return Message{}, err
+	}
+
+	section := &imap.FetchItemBodySection{Peek: false}
+
+	msgs, err := c.Fetch(imap.UIDSetNum(imap.UID(uid)), &imap.FetchOptions{
+		UID:          true,
+		Envelope:     true,
+		InternalDate: true,
+		BodySection:  []*imap.FetchItemBodySection{section},
+	}).Collect()
+	if err != nil {
+		return Message{}, err
+	}
+
+	if len(msgs) == 0 {
+		return Message{}, ErrMessageNotFound
+	}
+
+	buf := msgs[0] // choose the first message, there should in theory only be one anyway
+	msg := Message{MessageSummary: toSummary(buf)}
+	if buf.Envelope != nil {
+		msg.To = toAddresses(buf.Envelope.To)
+		msg.Cc = toAddresses(buf.Envelope.Cc)
+	}
+
+	if err := parseBody(&msg, buf.FindBodySection(section)); err != nil {
+		return Message{}, err
+	}
+
+	return msg, nil
+}
+
+func parseBody(msg *Message, raw []byte) error {
+	mr, err := gomail.CreateReader(bytes.NewReader(raw))
+
+	if err != nil && !message.IsUnknownCharset(err) {
+		return err
+	}
+
+	for {
+		part, err := mr.NextPart()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil && !message.IsUnknownCharset(err) {
+			return err
+		}
+		if part == nil {
+			continue
+		}
+
+		switch h := part.Header.(type) {
+		case *gomail.InlineHeader:
+			contentType, _, _ := h.ContentType()
+
+			switch contentType {
+			case "text/plain":
+				body, err := io.ReadAll(part.Body)
+				if err != nil {
+					return err
+				}
+				msg.TextBody += string(body)
+			case "text/html":
+				if msg.HTMLBody != "" {
+					continue
+				}
+				body, err := io.ReadAll(part.Body)
+				if err != nil {
+					return err
+				}
+				msg.HTMLBody = string(body)
+			default:
+				size, err := io.Copy(io.Discard, part.Body)
+				if err != nil {
+					return err
+				}
+				msg.Attachments = append(msg.Attachments, Attachment{
+					MIMEType: contentType,
+					Size:     uint32(size),
+				})
+			}
+
+		case *gomail.AttachmentHeader:
+			filename, _ := h.Filename()
+			contentType, _, _ := h.ContentType()
+
+			size, err := io.Copy(io.Discard, part.Body)
+			if err != nil {
+				return err
+			}
+
+			msg.Attachments = append(msg.Attachments, Attachment{
+				Filename: filename,
+				MIMEType: contentType,
+				Size:     uint32(size),
+			})
+		}
+	}
+
+	return nil
 }
